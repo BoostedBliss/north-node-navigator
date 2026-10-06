@@ -1,0 +1,6 @@
+{
+  "name": "Karmic Nodes & Astrocartography Transit Calculator",
+  "description": "Real-time Lunar Node transit calculator with interactive global astrocartography lines, karmic life path shifts, and nodal return cycles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
