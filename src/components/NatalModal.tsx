@@ -65,6 +65,7 @@ export const NatalModal: React.FC<NatalModalProps> = ({
       <div className="relative w-full max-w-md p-6 rounded-2xl bg-[#0e141f] border border-stone-800 shadow-2xl text-stone-200">
         <button
           onClick={onClose}
+          aria-label="Close modal"
           className="absolute top-4 right-4 p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
