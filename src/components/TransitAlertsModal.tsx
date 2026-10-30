@@ -69,6 +69,7 @@ export const TransitAlertsModal: React.FC<TransitAlertsModalProps> = ({
             </button>
             <button
               onClick={onClose}
+              aria-label="Close modal"
               className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
