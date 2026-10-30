@@ -96,7 +96,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
   };
 
   // Convert continent polygons to SVG path string
-  const renderContinents = () => {
+  const memoizedContinents = useMemo(() => {
     return CONTINENT_POLYGONS.map((cont) => {
       const pathD = cont.coordinates
         .map((coord, idx) => {
@@ -116,7 +116,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
         />
       );
     });
-  };
+  }, []);
 
 
 
@@ -343,7 +343,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
           {/* Transformed Layer for Zoom & Pan */}
           <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
             {/* World Landmass Continents */}
-            {renderContinents()}
+            {memoizedContinents}
 
             {/* Astrocartography Planetary Node Lines */}
             {filteredLines.map(renderLinePath)}
