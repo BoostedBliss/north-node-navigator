@@ -1,3 +1,3 @@
-## 2023-11-09 - Memoizing static SVG rendering
-**Learning:** `renderContinents` in `AstroMap.tsx` calculates SVG paths from coordinates on every render. Because the `CONTINENT_POLYGONS` coordinates never change and the conversion function `geoToSvgCoords` relies only on coordinates and fixed sizes, this produces the same result on every re-render (e.g. on every mouse drag or hover, or when date changes).
-**Action:** Use `useMemo` to memoize the static continent paths. They should only be recalculated if something relevant changes (which never happens for `CONTINENT_POLYGONS`).
+## 2025-02-28 - Optimize Haversine Distance Calculation Loop
+**Learning:** In geospatial calculations, specifically when finding the closest point on a path to a single coordinate using the Haversine formula, computing intermediate values (`a`) which relate monotonically to the true spherical distance allows removing expensive inverse trig functions (`Math.atan2`, `Math.sqrt`) from the inner loop.
+**Action:** When identifying bottlenecks in iterative distance calculations, seek to isolate monotonically proportional components. Only resolve the true distance mathematically on the final aggregated or filtered output to save expensive computational cycles.
