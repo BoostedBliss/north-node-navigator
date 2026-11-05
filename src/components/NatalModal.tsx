@@ -92,6 +92,7 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Elena"
+              maxLength={50} // 🛡️ Sentinel: Prevent excessively long input (DoS/Storage bloat mitigation)
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
               required
             />
