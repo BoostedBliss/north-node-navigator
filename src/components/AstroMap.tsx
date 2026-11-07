@@ -34,6 +34,40 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
+  const memoizedLinePaths = useMemo(() => {
+    const pathMap = new Map<string, string[]>();
+    lines.forEach((line) => {
+      if (line.points.length === 0) return;
+      const segments: [number, number][][] = [];
+      let currentSegment: [number, number][] = [];
+
+      for (let i = 0; i < line.points.length; i++) {
+        const pt = line.points[i];
+        if (currentSegment.length > 0) {
+          const prev = currentSegment[currentSegment.length - 1];
+          if (Math.abs(pt[0] - prev[0]) > 100) {
+            segments.push(currentSegment);
+            currentSegment = [];
+          }
+        }
+        currentSegment.push(pt);
+      }
+      if (currentSegment.length > 0) segments.push(currentSegment);
+
+      const pathStrings = segments.map((seg) => {
+        return seg
+          .map((pt, pIdx) => {
+            const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
+            return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+          })
+          .join(' ');
+      });
+
+      pathMap.set(line.id, pathStrings);
+    });
+    return pathMap;
+  }, [lines]);
+
   const filteredLines = useMemo(() => {
     return lines.filter((l) => {
       if (l.node === 'north' && !showNorth) return false;
@@ -45,6 +79,13 @@ export const AstroMap: React.FC<AstroMapProps> = ({
       return true;
     });
   }, [lines, showNorth, showSouth, showMC, showIC, showAC, showDC]);
+
+  const memoizedVortexCoords = useMemo(() => {
+    return FAMOUS_VORTEXES.map((vortex) => {
+      const [cx, cy] = geoToSvgCoords(vortex.lng, vortex.lat, 1000, 500);
+      return { ...vortex, cx, cy };
+    });
+  }, []);
 
   // Handle Pan
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -122,39 +163,15 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
   // Render astrocartography line
   const renderLinePath = (line: AstrocartographyLine) => {
-    if (line.points.length === 0) return null;
-
-    // Break lines when crossing the -180/180 date line
-    const segments: [number, number][][] = [];
-    let currentSegment: [number, number][] = [];
-
-    for (let i = 0; i < line.points.length; i++) {
-      const pt = line.points[i];
-      if (currentSegment.length > 0) {
-        const prev = currentSegment[currentSegment.length - 1];
-        if (Math.abs(pt[0] - prev[0]) > 100) {
-          // Wrap around boundary detected
-          segments.push(currentSegment);
-          currentSegment = [];
-        }
-      }
-      currentSegment.push(pt);
-    }
-    if (currentSegment.length > 0) segments.push(currentSegment);
+    const pathStrings = memoizedLinePaths.get(line.id);
+    if (!pathStrings || pathStrings.length === 0) return null;
 
     const isHovered = hoveredLine?.id === line.id;
     const isNorth = line.node === 'north';
 
     return (
       <g key={line.id} onMouseEnter={() => setHoveredLine(line)} onMouseLeave={() => setHoveredLine(null)}>
-        {segments.map((seg, sIdx) => {
-          const d = seg
-            .map((pt, pIdx) => {
-              const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
-              return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-            })
-            .join(' ');
-
+        {pathStrings.map((d, sIdx) => {
           return (
             <React.Fragment key={sIdx}>
               {/* Glow filter background path */}
@@ -350,9 +367,9 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
             {/* Sacred Vortexes & Major Cities */}
             {showVortexes &&
-              FAMOUS_VORTEXES.map((vortex) => {
-                const [cx, cy] = geoToSvgCoords(vortex.lng, vortex.lat, 1000, 500);
+              memoizedVortexCoords.map((vortex) => {
                 const isSelected = selectedLocation?.id === vortex.id;
+                const { cx, cy } = vortex;
 
                 return (
                   <g
