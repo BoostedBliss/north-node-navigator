@@ -49,13 +49,21 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sanitize name to prevent basic XSS
+    const sanitizedName = name.replace(/[<>]/g, '').trim().substring(0, 50);
+
+    // Clamp coordinates to valid geographical ranges
+    const clampedLat = Math.min(Math.max(Number(lat), -90), 90);
+    const clampedLng = Math.min(Math.max(Number(lng), -180), 180);
+
     onSave({
-      name: name.trim() || 'Seeker',
+      name: sanitizedName || 'Seeker',
       birthDate,
       birthTime,
       birthCity: selectedCity,
-      birthLat: Number(lat),
-      birthLng: Number(lng),
+      birthLat: clampedLat,
+      birthLng: clampedLng,
     });
     onClose();
   };
@@ -92,6 +100,7 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Elena"
+              maxLength={50}
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
               required
             />
@@ -151,6 +160,8 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               <input
                 type="number"
                 step="0.0001"
+                min={-90}
+                max={90}
                 value={lat}
                 onChange={(e) => setLat(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
@@ -161,6 +172,8 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               <input
                 type="number"
                 step="0.0001"
+                min={-180}
+                max={180}
                 value={lng}
                 onChange={(e) => setLng(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
