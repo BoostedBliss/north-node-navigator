@@ -274,6 +274,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
               onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
               className="p-1 hover:text-white text-slate-400 cursor-pointer"
               title="Zoom In"
+              aria-label="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
@@ -281,6 +282,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
               onClick={() => setZoom((z) => Math.max(z - 0.3, 0.8))}
               className="p-1 hover:text-white text-slate-400 cursor-pointer"
               title="Zoom Out"
+              aria-label="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -291,6 +293,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
               }}
               className="p-1 hover:text-white text-slate-400 cursor-pointer"
               title="Reset View"
+              aria-label="Reset View"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
