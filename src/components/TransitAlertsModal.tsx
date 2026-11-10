@@ -58,7 +58,8 @@ export const TransitAlertsModal: React.FC<TransitAlertsModalProps> = ({
                 onToggleSound();
                 if (!soundEnabled) playCelestialChime();
               }}
-              className={`p-2 rounded-xl border transition cursor-pointer ${
+              aria-label={soundEnabled ? 'Chime sound active' : 'Chime sound muted'}
+              className={`p-2 rounded-xl border focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none transition cursor-pointer ${
                 soundEnabled
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                   : 'bg-stone-800 text-stone-500 border-stone-700'
@@ -70,7 +71,7 @@ export const TransitAlertsModal: React.FC<TransitAlertsModalProps> = ({
             <button
               onClick={onClose}
               aria-label="Close modal"
-              className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 transition cursor-pointer"
+              className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
