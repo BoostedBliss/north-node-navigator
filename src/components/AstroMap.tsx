@@ -120,41 +120,54 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
 
 
-  // Render astrocartography line
-  const renderLinePath = (line: AstrocartographyLine) => {
-    if (line.points.length === 0) return null;
+  const memoizedLinePaths = useMemo(() => {
+    return filteredLines.map(line => {
+      if (line.points.length === 0) return { line, segments: [] };
 
-    // Break lines when crossing the -180/180 date line
-    const segments: [number, number][][] = [];
-    let currentSegment: [number, number][] = [];
+      const segments: string[] = [];
+      let currentSegment: [number, number][] = [];
 
-    for (let i = 0; i < line.points.length; i++) {
-      const pt = line.points[i];
-      if (currentSegment.length > 0) {
-        const prev = currentSegment[currentSegment.length - 1];
-        if (Math.abs(pt[0] - prev[0]) > 100) {
-          // Wrap around boundary detected
-          segments.push(currentSegment);
-          currentSegment = [];
+      for (let i = 0; i < line.points.length; i++) {
+        const pt = line.points[i];
+        if (currentSegment.length > 0) {
+          const prev = currentSegment[currentSegment.length - 1];
+          if (Math.abs(pt[0] - prev[0]) > 100) {
+            const d = currentSegment
+              .map((pt, pIdx) => {
+                const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
+                return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+              })
+              .join(' ');
+            segments.push(d);
+            currentSegment = [];
+          }
         }
+        currentSegment.push(pt);
       }
-      currentSegment.push(pt);
-    }
-    if (currentSegment.length > 0) segments.push(currentSegment);
+      if (currentSegment.length > 0) {
+        const d = currentSegment
+          .map((pt, pIdx) => {
+            const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
+            return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+          })
+          .join(' ');
+        segments.push(d);
+      }
+
+      return { line, segments };
+    });
+  }, [filteredLines]);
+
+  // Render astrocartography line
+  const renderLinePath = useMemo(() => ({ line, segments }: { line: AstrocartographyLine, segments: string[] }) => {
+    if (segments.length === 0) return null;
 
     const isHovered = hoveredLine?.id === line.id;
     const isNorth = line.node === 'north';
 
     return (
       <g key={line.id} onMouseEnter={() => setHoveredLine(line)} onMouseLeave={() => setHoveredLine(null)}>
-        {segments.map((seg, sIdx) => {
-          const d = seg
-            .map((pt, pIdx) => {
-              const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
-              return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-            })
-            .join(' ');
-
+        {segments.map((d, sIdx) => {
           return (
             <React.Fragment key={sIdx}>
               {/* Glow filter background path */}
@@ -181,7 +194,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
         })}
       </g>
     );
-  };
+  }, [hoveredLine]);
 
   // Find nearest lines to current selected location
   const nearestLines = useMemo(() => {
@@ -346,7 +359,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
             {memoizedContinents}
 
             {/* Astrocartography Planetary Node Lines */}
-            {filteredLines.map(renderLinePath)}
+            {memoizedLinePaths.map(renderLinePath)}
 
             {/* Sacred Vortexes & Major Cities */}
             {showVortexes &&
