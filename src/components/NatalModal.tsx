@@ -49,15 +49,21 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 🛡️ Sentinel: Limit name length to prevent potential layout breaking or storage issues (DoS)
-    const sanitizedName = name.trim().substring(0, 50) || 'Seeker';
+
+    // Sanitize name to prevent basic XSS
+    const sanitizedName = name.replace(/[<>]/g, '').trim().substring(0, 50);
+
+    // Clamp coordinates to valid geographical ranges
+    const clampedLat = Math.min(Math.max(Number(lat), -90), 90);
+    const clampedLng = Math.min(Math.max(Number(lng), -180), 180);
+
     onSave({
-      name: sanitizedName,
+      name: sanitizedName || 'Seeker',
       birthDate,
       birthTime,
-      birthCity: selectedCity.slice(0, 100),
-      birthLat: Math.max(-90, Math.min(90, Number(lat))),
-      birthLng: Math.max(-180, Math.min(180, Number(lng))),
+      birthCity: selectedCity,
+      birthLat: clampedLat,
+      birthLng: clampedLng,
     });
     onClose();
   };
@@ -96,7 +102,7 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               maxLength={50}
               placeholder="e.g. Elena"
-              maxLength={50} // 🛡️ Sentinel: Prevent excessively long input (DoS/Storage bloat mitigation)
+              maxLength={50}
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
               required
               maxLength={50}
