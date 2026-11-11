@@ -65,6 +65,7 @@ export const TransitAlertsModal: React.FC<TransitAlertsModalProps> = ({
                   : 'bg-stone-800 text-stone-500 border-stone-700'
               }`}
               title={soundEnabled ? 'Chime sound active' : 'Chime sound muted'}
+              aria-label={soundEnabled ? 'Chime sound active' : 'Chime sound muted'}
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
