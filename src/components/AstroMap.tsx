@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { AstrocartographyLine, PowerLocation } from '../types/astronomy';
 import { CONTINENT_POLYGONS, geoToSvgCoords, svgCoordsToGeo } from '../data/worldMapData';
 import { calculateDistanceToLine, FAMOUS_VORTEXES } from '../utils/astronomy';
@@ -121,7 +121,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
 
   // Render astrocartography line
-  const renderLinePath = (line: AstrocartographyLine) => {
+  const renderLinePath = useCallback((line: AstrocartographyLine) => {
     if (line.points.length === 0) return null;
 
     // Break lines when crossing the -180/180 date line
@@ -181,7 +181,12 @@ export const AstroMap: React.FC<AstroMapProps> = ({
         })}
       </g>
     );
-  };
+  }, [hoveredLine]);
+
+  // Memoize rendered paths for all filtered lines
+  const memoizedFilteredLines = useMemo(() => {
+    return filteredLines.map(renderLinePath);
+  }, [filteredLines, renderLinePath]);
 
   // Find nearest lines to current selected location
   const nearestLines = useMemo(() => {
@@ -346,7 +351,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
             {memoizedContinents}
 
             {/* Astrocartography Planetary Node Lines */}
-            {filteredLines.map(renderLinePath)}
+            {memoizedFilteredLines}
 
             {/* Sacred Vortexes & Major Cities */}
             {showVortexes &&
