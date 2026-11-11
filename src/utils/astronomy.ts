@@ -296,28 +296,29 @@ export function calculateDistanceToLine(
   lng: number,
   line: AstrocartographyLine
 ): { minDistanceKm: number; closestPoint: [number, number] } {
-  // Bolt Optimization: We track minA instead of minDistance to avoid calculating atan2 and Earth radius multiplication in the inner loop.
-  // 'a' is monotonically increasing with distance, so we just minimize 'a'.
   let minA = Infinity;
   let closest: [number, number] = [0, 0];
 
-  const lat1 = (lat * Math.PI) / 180;
-  const lon1 = (lng * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const DEG_TO_RAD = Math.PI / 180;
+  const lat1 = lat * DEG_TO_RAD;
+  const lon1 = lng * DEG_TO_RAD;
   const cosLat1 = Math.cos(lat1);
 
   for (const pt of line.points) {
-    const lon2 = (pt[0] * Math.PI) / 180;
-    const lat2 = (pt[1] * Math.PI) / 180;
+    const lon2 = pt[0] * DEG_TO_RAD;
+    const lat2 = pt[1] * DEG_TO_RAD;
 
     const dLat = lat2 - lat1;
     let dLon = lon2 - lon1;
     // Account for wrap-around longitude
     if (dLon > Math.PI) dLon -= 2 * Math.PI;
-    if (dLon < -Math.PI) dLon += 2 * Math.PI;
+    else if (dLon < -Math.PI) dLon += 2 * Math.PI;
 
     const sinDLat2 = Math.sin(dLat / 2);
     const sinDLon2 = Math.sin(dLon / 2);
 
+    // Calculate intermediate value a (monotonically related to distance)
     const a =
       sinDLat2 * sinDLat2 +
       cosLat1 * Math.cos(lat2) * sinDLon2 * sinDLon2;
@@ -328,7 +329,7 @@ export function calculateDistanceToLine(
     }
   }
 
-  const R = 6371; // Earth radius in km
+  // Only calculate expensive inverse trig function for the closest point
   const c = 2 * Math.atan2(Math.sqrt(minA), Math.sqrt(1 - minA));
   const minDistance = R * c;
 

@@ -1,7 +1,3 @@
-## 2023-11-09 - Memoizing static SVG rendering
-**Learning:** `renderContinents` in `AstroMap.tsx` calculates SVG paths from coordinates on every render. Because the `CONTINENT_POLYGONS` coordinates never change and the conversion function `geoToSvgCoords` relies only on coordinates and fixed sizes, this produces the same result on every re-render (e.g. on every mouse drag or hover, or when date changes).
-**Action:** Use `useMemo` to memoize the static continent paths. They should only be recalculated if something relevant changes (which never happens for `CONTINENT_POLYGONS`).
-
-## 2025-02-21 - Optimizing nested math calculations (Haversine formula)
-**Learning:** In the Astrocartography map projection (`calculateDistanceToLine`), the application iteratively computes the distance from a location to thousands of points on generated celestial lines. The Haversine formula calculates `a` (which represents the square of half the chord length between the points). `a` monotonically increases with the great-circle distance `c`. The original code ran expensive inverse trigonometric functions (`Math.atan2`, `Math.sqrt`) inside the tight loop for every single point to compute `c` and `d`, just to find the minimum distance.
-**Action:** When searching for the shortest distance using the Haversine formula, track the minimum `a` value during the iteration. Then apply the `Math.atan2` and radius multiplication once, at the very end outside of the loop.
+## 2025-02-28 - Optimize Haversine Distance Calculation Loop
+**Learning:** In geospatial calculations, specifically when finding the closest point on a path to a single coordinate using the Haversine formula, computing intermediate values (`a`) which relate monotonically to the true spherical distance allows removing expensive inverse trig functions (`Math.atan2`, `Math.sqrt`) from the inner loop.
+**Action:** When identifying bottlenecks in iterative distance calculations, seek to isolate monotonically proportional components. Only resolve the true distance mathematically on the final aggregated or filtered output to save expensive computational cycles.
