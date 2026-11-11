@@ -305,9 +305,13 @@ export function calculateDistanceToLine(
   const lon1 = lng * DEG_TO_RAD;
   const cosLat1 = Math.cos(lat1);
 
-  for (const pt of line.points) {
-    const lon2 = pt[0] * DEG_TO_RAD;
-    const lat2 = pt[1] * DEG_TO_RAD;
+  // ⚡ Bolt: Pre-calculate constant cosine for base latitude to speed up inner loop
+  const cosLat1 = Math.cos(lat1);
+
+  for (let i = 0; i < line.points.length; i++) {
+    const pt = line.points[i];
+    const lon2 = (pt[0] * Math.PI) / 180;
+    const lat2 = (pt[1] * Math.PI) / 180;
 
     const dLat = lat2 - lat1;
     let dLon = lon2 - lon1;
@@ -315,13 +319,17 @@ export function calculateDistanceToLine(
     if (dLon > Math.PI) dLon -= 2 * Math.PI;
     else if (dLon < -Math.PI) dLon += 2 * Math.PI;
 
-    const sinDLat2 = Math.sin(dLat / 2);
-    const sinDLon2 = Math.sin(dLon / 2);
+    // ⚡ Bolt: Fast bounding box rejection check based on latitude difference
+    if (minDistance < Infinity) {
+       const maxRad = minDistance / R;
+       if (Math.abs(dLat) > maxRad) continue;
+    }
 
-    // Calculate intermediate value a (monotonically related to distance)
     const a =
-      sinDLat2 * sinDLat2 +
-      cosLat1 * Math.cos(lat2) * sinDLon2 * sinDLon2;
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      cosLat1 * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
 
     if (a < minA) {
       minA = a;
