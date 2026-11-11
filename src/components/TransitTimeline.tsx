@@ -97,7 +97,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
                 : 'bg-[#151c28] hover:bg-[#1c2536] text-emerald-400'
             }`}
             title={isPlaying ? 'Pause auto transit progression' : 'Play transit progression'}
-            aria-label={isPlaying ? 'Pause transit progression' : 'Play transit progression'}
+            aria-label={isPlaying ? 'Pause auto transit progression' : 'Play transit progression'}
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
