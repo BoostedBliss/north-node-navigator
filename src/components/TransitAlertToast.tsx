@@ -48,7 +48,7 @@ export const TransitAlertToast: React.FC<TransitAlertToastProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               onClick={onToggleSound}
-              className="p-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer"
+              className="p-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
               title={soundEnabled ? 'Disable celestial chime' : 'Enable celestial chime'}
               aria-label={soundEnabled ? 'Disable celestial chime' : 'Enable celestial chime'}
             >
@@ -60,7 +60,7 @@ export const TransitAlertToast: React.FC<TransitAlertToastProps> = ({
             </button>
             <button
               onClick={onDismiss}
-              className="p-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer"
+              className="p-1 rounded-md text-slate-400 hover:text-white transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
               title="Dismiss alert"
               aria-label="Dismiss alert"
             >
