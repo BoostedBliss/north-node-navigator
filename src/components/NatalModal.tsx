@@ -50,12 +50,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      name: name.trim() || 'Seeker',
+      name: (name.trim() || 'Seeker').slice(0, 50),
       birthDate,
       birthTime,
-      birthCity: selectedCity,
-      birthLat: Number(lat),
-      birthLng: Number(lng),
+      birthCity: selectedCity.slice(0, 100),
+      birthLat: Math.max(-90, Math.min(90, Number(lat))),
+      birthLng: Math.max(-180, Math.min(180, Number(lng))),
     });
     onClose();
   };
@@ -93,8 +93,10 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Elena"
+              maxLength={50} // 🛡️ Sentinel: Prevent excessively long input (DoS/Storage bloat mitigation)
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
               required
+              maxLength={50}
             />
           </div>
 
@@ -156,6 +158,8 @@ export const NatalModal: React.FC<NatalModalProps> = ({
                 id="natal-lat"
                 type="number"
                 step="0.0001"
+                min={-90}
+                max={90}
                 value={lat}
                 onChange={(e) => setLat(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
@@ -167,6 +171,8 @@ export const NatalModal: React.FC<NatalModalProps> = ({
                 id="natal-lng"
                 type="number"
                 step="0.0001"
+                min={-180}
+                max={180}
                 value={lng}
                 onChange={(e) => setLng(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
