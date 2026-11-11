@@ -50,12 +50,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      name: name.trim() || 'Seeker',
+      name: (name.trim() || 'Seeker').slice(0, 50),
       birthDate,
       birthTime,
-      birthCity: selectedCity,
-      birthLat: Number(lat),
-      birthLng: Number(lng),
+      birthCity: selectedCity.slice(0, 100),
+      birthLat: Math.max(-90, Math.min(90, Number(lat))),
+      birthLng: Math.max(-180, Math.min(180, Number(lng))),
     });
     onClose();
   };
@@ -83,27 +83,31 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+            <label htmlFor="natal-name" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-stone-400" />
               <span>Full Name or Alias</span>
             </label>
             <input
+              id="natal-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Elena"
+              maxLength={50} // 🛡️ Sentinel: Prevent excessively long input (DoS/Storage bloat mitigation)
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
               required
+              maxLength={50}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-birth-date" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Date</span>
               </label>
               <input
+                id="natal-birth-date"
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
@@ -113,11 +117,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-birth-time" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Time (Local)</span>
               </label>
               <input
+                id="natal-birth-time"
                 type="time"
                 value={birthTime}
                 onChange={(e) => setBirthTime(e.target.value)}
@@ -128,11 +133,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+            <label htmlFor="natal-birth-city" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-stone-400" />
               <span>Birth City / Region</span>
             </label>
             <select
+              id="natal-birth-city"
               value={selectedCity}
               onChange={(e) => handleCityChange(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-xs focus:border-emerald-400 focus:outline-none text-stone-200"
@@ -147,20 +153,26 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-mono text-stone-400 mb-1">Latitude</label>
+              <label htmlFor="natal-lat" className="block text-[11px] font-mono text-stone-400 mb-1">Latitude</label>
               <input
+                id="natal-lat"
                 type="number"
                 step="0.0001"
+                min={-90}
+                max={90}
                 value={lat}
                 onChange={(e) => setLat(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-mono text-stone-400 mb-1">Longitude</label>
+              <label htmlFor="natal-lng" className="block text-[11px] font-mono text-stone-400 mb-1">Longitude</label>
               <input
+                id="natal-lng"
                 type="number"
                 step="0.0001"
+                min={-180}
+                max={180}
                 value={lng}
                 onChange={(e) => setLng(Number(e.target.value))}
                 className="w-full px-2.5 py-1.5 rounded-lg bg-[#131924] border border-stone-800 text-xs font-mono text-stone-300"
