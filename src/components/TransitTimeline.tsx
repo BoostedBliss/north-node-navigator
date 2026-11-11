@@ -77,6 +77,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
             onClick={jumpToNow}
             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#141a24] hover:bg-[#1a2230] text-stone-200 border border-stone-800 transition flex items-center gap-1 cursor-pointer"
             title="Reset to Real-Time Now"
+            aria-label="Reset to Real-Time Now"
           >
             <RotateCcw className="w-3 h-3 text-emerald-400" />
             <span>Now</span>
@@ -90,12 +91,13 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
           {/* Play / Pause auto advance */}
           <button
             onClick={onTogglePlay}
-            className={`p-2 rounded-lg transition cursor-pointer ${
+            className={`p-2 rounded-lg transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
               isPlaying
                 ? 'bg-emerald-600 text-stone-950 font-bold'
                 : 'bg-[#151c28] hover:bg-[#1c2536] text-emerald-400'
             }`}
             title={isPlaying ? 'Pause auto transit progression' : 'Play transit progression'}
+            aria-label={isPlaying ? 'Pause auto transit progression' : 'Play transit progression'}
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
