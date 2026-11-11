@@ -91,7 +91,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
           {/* Play / Pause auto advance */}
           <button
             onClick={onTogglePlay}
-            className={`p-2 rounded-lg transition cursor-pointer ${
+            className={`p-2 rounded-lg transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               isPlaying
                 ? 'bg-emerald-600 text-stone-950 font-bold'
                 : 'bg-[#151c28] hover:bg-[#1c2536] text-emerald-400'

@@ -58,6 +58,7 @@ export const TransitAlertsModal: React.FC<TransitAlertsModalProps> = ({
                 onToggleSound();
                 if (!soundEnabled) playCelestialChime();
               }}
+              aria-label={soundEnabled ? 'Disable celestial chime' : 'Enable celestial chime'}
               className={`p-2 rounded-xl border transition cursor-pointer ${
                 soundEnabled
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
