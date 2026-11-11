@@ -296,12 +296,14 @@ export function calculateDistanceToLine(
   lng: number,
   line: AstrocartographyLine
 ): { minDistanceKm: number; closestPoint: [number, number] } {
-  let minDistance = Infinity;
+  // Bolt Optimization: We track minA instead of minDistance to avoid calculating atan2 and Earth radius multiplication in the inner loop.
+  // 'a' is monotonically increasing with distance, so we just minimize 'a'.
+  let minA = Infinity;
   let closest: [number, number] = [0, 0];
 
-  const R = 6371; // Earth radius in km
   const lat1 = (lat * Math.PI) / 180;
   const lon1 = (lng * Math.PI) / 180;
+  const cosLat1 = Math.cos(lat1);
 
   for (const pt of line.points) {
     const lon2 = (pt[0] * Math.PI) / 180;
@@ -313,17 +315,22 @@ export function calculateDistanceToLine(
     if (dLon > Math.PI) dLon -= 2 * Math.PI;
     if (dLon < -Math.PI) dLon += 2 * Math.PI;
 
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
+    const sinDLat2 = Math.sin(dLat / 2);
+    const sinDLon2 = Math.sin(dLon / 2);
 
-    if (d < minDistance) {
-      minDistance = d;
+    const a =
+      sinDLat2 * sinDLat2 +
+      cosLat1 * Math.cos(lat2) * sinDLon2 * sinDLon2;
+
+    if (a < minA) {
+      minA = a;
       closest = pt;
     }
   }
+
+  const R = 6371; // Earth radius in km
+  const c = 2 * Math.atan2(Math.sqrt(minA), Math.sqrt(1 - minA));
+  const minDistance = R * c;
 
   return { minDistanceKm: Math.round(minDistance), closestPoint: closest };
 }
