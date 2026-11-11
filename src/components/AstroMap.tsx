@@ -274,7 +274,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
           <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5 ml-1">
             <button
               onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none rounded"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none rounded"
               title="Zoom In"
               aria-label="Zoom In"
             >
@@ -282,7 +282,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
             </button>
             <button
               onClick={() => setZoom((z) => Math.max(z - 0.3, 0.8))}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none rounded"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none rounded"
               title="Zoom Out"
               aria-label="Zoom Out"
             >
@@ -293,7 +293,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
                 setZoom(1);
                 setPan({ x: 0, y: 0 });
               }}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none rounded"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none rounded"
               title="Reset View"
               aria-label="Reset View"
             >
