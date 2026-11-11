@@ -102,12 +102,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="natal-birth-date" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-date" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Date</span>
               </label>
               <input
-                id="natal-birth-date"
+                id="natal-date"
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
@@ -117,12 +117,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="natal-birth-time" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-time" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Time (Local)</span>
               </label>
               <input
-                id="natal-birth-time"
+                id="natal-time"
                 type="time"
                 value={birthTime}
                 onChange={(e) => setBirthTime(e.target.value)}
@@ -133,12 +133,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
           </div>
 
           <div>
-            <label htmlFor="natal-birth-city" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+            <label htmlFor="natal-city" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-stone-400" />
               <span>Birth City / Region</span>
             </label>
             <select
-              id="natal-birth-city"
+              id="natal-city"
               value={selectedCity}
               onChange={(e) => handleCityChange(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-xs focus:border-emerald-400 focus:outline-none text-stone-200"
