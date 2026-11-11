@@ -83,11 +83,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+            <label htmlFor="natal-name" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-stone-400" />
               <span>Full Name or Alias</span>
             </label>
             <input
+              id="natal-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -100,11 +101,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-birthDate" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Date</span>
               </label>
               <input
+                id="natal-birthDate"
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
@@ -114,11 +116,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+              <label htmlFor="natal-birthTime" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-stone-400" />
                 <span>Birth Time (Local)</span>
               </label>
               <input
+                id="natal-birthTime"
                 type="time"
                 value={birthTime}
                 onChange={(e) => setBirthTime(e.target.value)}
@@ -129,11 +132,12 @@ export const NatalModal: React.FC<NatalModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
+            <label htmlFor="natal-birthCity" className="block text-xs font-medium text-stone-300 mb-1 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-stone-400" />
               <span>Birth City / Region</span>
             </label>
             <select
+              id="natal-birthCity"
               value={selectedCity}
               onChange={(e) => handleCityChange(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-xs focus:border-emerald-400 focus:outline-none text-stone-200"
@@ -148,8 +152,9 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-mono text-stone-400 mb-1">Latitude</label>
+              <label htmlFor="natal-lat" className="block text-[11px] font-mono text-stone-400 mb-1">Latitude</label>
               <input
+                id="natal-lat"
                 type="number"
                 step="0.0001"
                 min={-90}
@@ -160,8 +165,9 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-[11px] font-mono text-stone-400 mb-1">Longitude</label>
+              <label htmlFor="natal-lng" className="block text-[11px] font-mono text-stone-400 mb-1">Longitude</label>
               <input
+                id="natal-lng"
                 type="number"
                 step="0.0001"
                 min={-180}
