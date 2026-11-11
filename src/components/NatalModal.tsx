@@ -49,8 +49,10 @@ export const NatalModal: React.FC<NatalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // 🛡️ Sentinel: Limit name length to prevent potential layout breaking or storage issues (DoS)
+    const sanitizedName = name.trim().substring(0, 50) || 'Seeker';
     onSave({
-      name: (name.trim() || 'Seeker').slice(0, 50),
+      name: sanitizedName,
       birthDate,
       birthTime,
       birthCity: selectedCity.slice(0, 100),
@@ -92,6 +94,7 @@ export const NatalModal: React.FC<NatalModalProps> = ({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              maxLength={50}
               placeholder="e.g. Elena"
               maxLength={50} // 🛡️ Sentinel: Prevent excessively long input (DoS/Storage bloat mitigation)
               className="w-full px-3 py-2 rounded-xl bg-[#131924] border border-stone-800 text-sm focus:border-emerald-400 focus:outline-none text-stone-100"
