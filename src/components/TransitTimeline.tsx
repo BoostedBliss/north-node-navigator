@@ -77,6 +77,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
             onClick={jumpToNow}
             className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#141a24] hover:bg-[#1a2230] text-stone-200 border border-stone-800 transition flex items-center gap-1 cursor-pointer"
             title="Reset to Real-Time Now"
+            aria-label="Reset to Real-Time Now"
           >
             <RotateCcw className="w-3 h-3 text-emerald-400" />
             <span>Now</span>
@@ -90,7 +91,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
           {/* Play / Pause auto advance */}
           <button
             onClick={onTogglePlay}
-            className={`p-2 rounded-lg transition cursor-pointer ${
+            className={`p-2 rounded-lg transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               isPlaying
                 ? 'bg-emerald-600 text-stone-950 font-bold'
                 : 'bg-[#151c28] hover:bg-[#1c2536] text-emerald-400'
@@ -105,12 +106,14 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
           <button
             onClick={() => jumpMonths(-1)}
             className="px-2 py-1 rounded bg-[#151c28] hover:bg-[#1c2536] text-stone-300 text-xs font-mono cursor-pointer"
+            aria-label="Step back 1 month"
           >
             -1 Mo
           </button>
           <button
             onClick={() => jumpYears(-1)}
             className="px-2 py-1 rounded bg-[#151c28] hover:bg-[#1c2536] text-stone-300 text-xs font-mono cursor-pointer"
+            aria-label="Step back 1 year"
           >
             -1 Yr
           </button>
@@ -118,6 +121,7 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
             onClick={() => jumpNodalCycle(-1)}
             className="px-2.5 py-1 rounded bg-teal-950/50 hover:bg-teal-900/70 border border-teal-700/50 text-teal-300 text-xs font-mono cursor-pointer"
             title="Step back 1 Nodal Cycle (~18.6 years)"
+            aria-label="Step back 1 Nodal Cycle"
           >
             -18.6y
           </button>
@@ -149,18 +153,21 @@ export const TransitTimeline: React.FC<TransitTimelineProps> = ({
             onClick={() => jumpNodalCycle(1)}
             className="px-2.5 py-1 rounded bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-700/50 text-indigo-300 text-xs font-mono cursor-pointer"
             title="Step forward 1 Nodal Cycle (~18.6 years)"
+            aria-label="Step forward 1 Nodal Cycle"
           >
             +18.6y
           </button>
           <button
             onClick={() => jumpYears(1)}
             className="px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-mono cursor-pointer"
+            aria-label="Step forward 1 year"
           >
             +1 Yr
           </button>
           <button
             onClick={() => jumpMonths(1)}
             className="px-2 py-1 rounded bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-mono cursor-pointer"
+            aria-label="Step forward 1 month"
           >
             +1 Mo
           </button>
