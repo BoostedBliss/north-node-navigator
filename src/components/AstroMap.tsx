@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { AstrocartographyLine, PowerLocation } from '../types/astronomy';
 import { CONTINENT_POLYGONS, geoToSvgCoords, svgCoordsToGeo } from '../data/worldMapData';
 import { calculateDistanceToLine, FAMOUS_VORTEXES } from '../utils/astronomy';
@@ -197,23 +197,22 @@ export const AstroMap: React.FC<AstroMapProps> = ({
 
 
 
-  // Pre-calculate SVG paths for lines to avoid doing it on every render/pan/zoom
-  const memoizedLinePaths = useMemo(() => {
-    const pathsMap = new Map<string, string[]>();
-    filteredLines.forEach((line) => {
-      if (line.points.length === 0) return;
+  // Render astrocartography line
+  const renderLinePath = useCallback((line: AstrocartographyLine) => {
+    if (line.points.length === 0) return null;
 
-      const segments: [number, number][][] = [];
-      let currentSegment: [number, number][] = [];
+    // Break lines when crossing the -180/180 date line
+    const segments: [number, number][][] = [];
+    let currentSegment: [number, number][] = [];
 
-      for (let i = 0; i < line.points.length; i++) {
-        const pt = line.points[i];
-        if (currentSegment.length > 0) {
-          const prev = currentSegment[currentSegment.length - 1];
-          if (Math.abs(pt[0] - prev[0]) > 100) {
-            segments.push(currentSegment);
-            currentSegment = [];
-          }
+    for (let i = 0; i < line.points.length; i++) {
+      const pt = line.points[i];
+      if (currentSegment.length > 0) {
+        const prev = currentSegment[currentSegment.length - 1];
+        if (Math.abs(pt[0] - prev[0]) > 100) {
+          // Wrap around boundary detected
+          segments.push(currentSegment);
+          currentSegment = [];
         }
         currentSegment.push(pt);
       }
@@ -268,7 +267,12 @@ export const AstroMap: React.FC<AstroMapProps> = ({
         ))}
       </g>
     );
-  }, [memoizedLinePaths, hoveredLine]);
+  }, [hoveredLine]);
+
+  // Memoize rendered paths for all filtered lines
+  const memoizedFilteredLines = useMemo(() => {
+    return filteredLines.map(renderLinePath);
+  }, [filteredLines, renderLinePath]);
 
   // Find nearest lines to current selected location
   const nearestLines = useMemo(() => {
@@ -436,7 +440,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
             {memoizedContinents}
 
             {/* Astrocartography Planetary Node Lines */}
-            {memoizedLines}
+            {memoizedFilteredLines}
 
             {/* Sacred Vortexes & Major Cities */}
             {showVortexes &&
