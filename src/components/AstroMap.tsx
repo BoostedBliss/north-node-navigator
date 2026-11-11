@@ -95,6 +95,42 @@ export const AstroMap: React.FC<AstroMapProps> = ({
     onSelectLocation(customLoc);
   };
 
+  // Pre-calculate line SVG paths so we don't recalculate 1000s of coords during pan/zoom state updates
+  const memoizedLinePaths = useMemo(() => {
+    const pathsMap = new Map<string, string[]>();
+
+    lines.forEach((line) => {
+      if (line.points.length === 0) return;
+
+      const segments: [number, number][][] = [];
+      let currentSegment: [number, number][] = [];
+
+      for (let i = 0; i < line.points.length; i++) {
+        const pt = line.points[i];
+        if (currentSegment.length > 0) {
+          const prev = currentSegment[currentSegment.length - 1];
+          if (Math.abs(pt[0] - prev[0]) > 100) {
+            segments.push(currentSegment);
+            currentSegment = [];
+          }
+        }
+        currentSegment.push(pt);
+      }
+      if (currentSegment.length > 0) segments.push(currentSegment);
+
+      const pathStrings = segments.map((seg) => {
+        return seg.map((pt, pIdx) => {
+          const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
+          return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+        }).join(' ');
+      });
+
+      pathsMap.set(line.id, pathStrings);
+    });
+
+    return pathsMap;
+  }, [lines]);
+
   // Convert continent polygons to SVG path string
   const memoizedContinents = useMemo(() => {
     return CONTINENT_POLYGONS.map((cont) => {
@@ -118,67 +154,73 @@ export const AstroMap: React.FC<AstroMapProps> = ({
     });
   }, []);
 
+  // ⚡ Bolt: Memoize expensive geographic coordinate-to-SVG path transformations for lines
+  const memoizedLinePaths = useMemo(() => {
+    const pathsMap: Record<string, string[]> = {};
+    for (const line of lines) {
+      if (line.points.length === 0) continue;
 
+      const segments: [number, number][][] = [];
+      let currentSegment: [number, number][] = [];
+
+      for (let i = 0; i < line.points.length; i++) {
+        const pt = line.points[i];
+        if (currentSegment.length > 0) {
+          const prev = currentSegment[currentSegment.length - 1];
+          if (Math.abs(pt[0] - prev[0]) > 100) {
+            segments.push(currentSegment);
+            currentSegment = [];
+          }
+        }
+        currentSegment.push(pt);
+      }
+      if (currentSegment.length > 0) segments.push(currentSegment);
+
+      pathsMap[line.id] = segments.map((seg) => {
+        return seg
+          .map((pt, pIdx) => {
+            const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
+            return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+          })
+          .join(' ');
+      });
+    }
+    return pathsMap;
+  }, [lines]);
 
   // Render astrocartography line
   const renderLinePath = (line: AstrocartographyLine) => {
-    if (line.points.length === 0) return null;
-
-    // Break lines when crossing the -180/180 date line
-    const segments: [number, number][][] = [];
-    let currentSegment: [number, number][] = [];
-
-    for (let i = 0; i < line.points.length; i++) {
-      const pt = line.points[i];
-      if (currentSegment.length > 0) {
-        const prev = currentSegment[currentSegment.length - 1];
-        if (Math.abs(pt[0] - prev[0]) > 100) {
-          // Wrap around boundary detected
-          segments.push(currentSegment);
-          currentSegment = [];
-        }
-      }
-      currentSegment.push(pt);
-    }
-    if (currentSegment.length > 0) segments.push(currentSegment);
+    const paths = memoizedLinePaths[line.id];
+    if (!paths) return null;
 
     const isHovered = hoveredLine?.id === line.id;
     const isNorth = line.node === 'north';
 
     return (
       <g key={line.id} onMouseEnter={() => setHoveredLine(line)} onMouseLeave={() => setHoveredLine(null)}>
-        {segments.map((seg, sIdx) => {
-          const d = seg
-            .map((pt, pIdx) => {
-              const [x, y] = geoToSvgCoords(pt[0], pt[1], 1000, 500);
-              return `${pIdx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-            })
-            .join(' ');
-
-          return (
-            <React.Fragment key={sIdx}>
-              {/* Glow filter background path */}
-              <path
-                d={d}
-                fill="none"
-                stroke={line.color}
-                strokeWidth={isHovered ? 4.5 : 2.2}
-                strokeOpacity={isHovered ? 0.9 : 0.65}
-                strokeLinecap="round"
-                className="cursor-pointer transition-all duration-200"
-              />
-              {/* High contrast sharp foreground line */}
-              <path
-                d={d}
-                fill="none"
-                stroke={isNorth ? '#ffffff' : '#ffd4a8'}
-                strokeWidth={isHovered ? 1.5 : 0.8}
-                strokeDasharray={line.type === 'IC' ? '4 3' : line.type === 'DC' ? '6 3' : undefined}
-                className="pointer-events-none"
-              />
-            </React.Fragment>
-          );
-        })}
+        {paths.map((d, sIdx) => (
+          <React.Fragment key={sIdx}>
+            {/* Glow filter background path */}
+            <path
+              d={d}
+              fill="none"
+              stroke={line.color}
+              strokeWidth={isHovered ? 4.5 : 2.2}
+              strokeOpacity={isHovered ? 0.9 : 0.65}
+              strokeLinecap="round"
+              className="cursor-pointer transition-all duration-200"
+            />
+            {/* High contrast sharp foreground line */}
+            <path
+              d={d}
+              fill="none"
+              stroke={isNorth ? '#ffffff' : '#ffd4a8'}
+              strokeWidth={isHovered ? 1.5 : 0.8}
+              strokeDasharray={line.type === 'IC' ? '4 3' : line.type === 'DC' ? '6 3' : undefined}
+              className="pointer-events-none"
+            />
+          </React.Fragment>
+        ))}
       </g>
     );
   };
@@ -272,15 +314,17 @@ export const AstroMap: React.FC<AstroMapProps> = ({
           <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5 ml-1">
             <button
               onClick={() => setZoom((z) => Math.min(z + 0.3, 3.5))}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded"
               title="Zoom In"
+              aria-label="Zoom In"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setZoom((z) => Math.max(z - 0.3, 0.8))}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded"
               title="Zoom Out"
+              aria-label="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -289,8 +333,9 @@ export const AstroMap: React.FC<AstroMapProps> = ({
                 setZoom(1);
                 setPan({ x: 0, y: 0 });
               }}
-              className="p-1 hover:text-white text-slate-400 cursor-pointer"
+              className="p-1 hover:text-white text-slate-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded"
               title="Reset View"
+              aria-label="Reset View"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -346,7 +391,7 @@ export const AstroMap: React.FC<AstroMapProps> = ({
             {memoizedContinents}
 
             {/* Astrocartography Planetary Node Lines */}
-            {filteredLines.map(renderLinePath)}
+            {memoizedRenderedLines}
 
             {/* Sacred Vortexes & Major Cities */}
             {showVortexes &&

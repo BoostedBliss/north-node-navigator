@@ -296,14 +296,20 @@ export function calculateDistanceToLine(
   lng: number,
   line: AstrocartographyLine
 ): { minDistanceKm: number; closestPoint: [number, number] } {
-  let minDistance = Infinity;
+  let minA = Infinity;
   let closest: [number, number] = [0, 0];
 
   const R = 6371; // Earth radius in km
-  const lat1 = (lat * Math.PI) / 180;
-  const lon1 = (lng * Math.PI) / 180;
+  const DEG_TO_RAD = Math.PI / 180;
+  const lat1 = lat * DEG_TO_RAD;
+  const lon1 = lng * DEG_TO_RAD;
+  const cosLat1 = Math.cos(lat1);
 
-  for (const pt of line.points) {
+  // ⚡ Bolt: Pre-calculate constant cosine for base latitude to speed up inner loop
+  const cosLat1 = Math.cos(lat1);
+
+  for (let i = 0; i < line.points.length; i++) {
+    const pt = line.points[i];
     const lon2 = (pt[0] * Math.PI) / 180;
     const lat2 = (pt[1] * Math.PI) / 180;
 
@@ -311,19 +317,29 @@ export function calculateDistanceToLine(
     let dLon = lon2 - lon1;
     // Account for wrap-around longitude
     if (dLon > Math.PI) dLon -= 2 * Math.PI;
-    if (dLon < -Math.PI) dLon += 2 * Math.PI;
+    else if (dLon < -Math.PI) dLon += 2 * Math.PI;
+
+    // ⚡ Bolt: Fast bounding box rejection check based on latitude difference
+    if (minDistance < Infinity) {
+       const maxRad = minDistance / R;
+       if (Math.abs(dLat) > maxRad) continue;
+    }
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      cosLat1 * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
 
-    if (d < minDistance) {
-      minDistance = d;
+    if (a < minA) {
+      minA = a;
       closest = pt;
     }
   }
+
+  // Only calculate expensive inverse trig function for the closest point
+  const c = 2 * Math.atan2(Math.sqrt(minA), Math.sqrt(1 - minA));
+  const minDistance = R * c;
 
   return { minDistanceKm: Math.round(minDistance), closestPoint: closest };
 }
